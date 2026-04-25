@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainTest V1 — (Game Pengasah Otak)</title>
+    <style>
+        :root {
+            --ungu1: #5b21b6;
+            --ungu2: #7c3aed;
+            --ungu3: #a855f7;
+            --ungu4: #c084fc;
+            --dark: #0f0a1a;
+            --darker: #07040f;
+            --card-bg: rgba(20, 14, 35, 0.85);
+            --text: #f0e6ff;
+            --gold: #fbbf24;
+            --success: #22c55e;
+            --error: #ef4444;
+            --glass: rgba(255, 255, 255, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+            background: var(--darker);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            color: var(--text);
+            position: relative;
+        }
+
+        /* === ANIMATED BACKGROUND === */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .bg-gradient {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 20% 20%, #3b0764 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, #1e1b4b 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, #0f0720 0%, #07030f 100%);
+            animation: bgShift 15s ease-in-out infinite;
+        }
+        @keyframes bgShift {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            25% {
+                opacity: 0.85;
+            }
+            50% {
+                opacity: 0.95;
+            }
+            75% {
+                opacity: 0.8;
+            }
+        }
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float 18s ease-in-out infinite;
+            opacity: 0.35;
+        }
+        .orb1 {
+            width: 300px;
+            height: 300px;
+            background: #7c3aed;
+            top: -80px;
+            left: -60px;
+            animation-delay: 0s;
+        }
+        .orb2 {
+            width: 250px;
+            height: 250px;
+            background: #a855f7;
+            bottom: -70px;
+            right: -50px;
+            animation-delay: -6s;
+        }
+        .orb3 {
+            width: 200px;
+            height: 200px;
+            background: #6366f1;
+            top: 50%;
+            left: 40%;
+            animation-delay: -12s;
+        }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(60px, -50px) scale(1.2);
+            }
+            50% {
+                transform: translate(-30px, -90px) scale(0.9);
+            }
+            75% {
+                transform: translate(-70px, 40px) scale(1.15);
+            }
+        }
+
+        /* === FALLING STARS CONTAINER === */
+        .falling-stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .falling-star {
+            position: absolute;
+            top: -60px;
+            width: 2px;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: fallStar linear infinite;
+            box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.9), 0 0 12px 4px rgba(168, 85, 247, 0.7),
+                0 0 20px 6px rgba(124, 58, 237, 0.5), 0 0 35px 10px rgba(99, 102, 241, 0.3);
+            opacity: 0;
+        }
+        .falling-star::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(168, 85, 247, 0.4), transparent);
+            border-radius: 1px;
+            transform: translateY(-40px);
+            box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes fallStar {
+            0% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0;
+            }
+            3% {
+                opacity: 1;
+            }
+            8% {
+                opacity: 0.9;
+                transform: translateY(80px) translateX(25px) scale(1.1);
+            }
+            20% {
+                opacity: 0.5;
+                transform: translateY(220px) translateX(70px) scale(0.8);
+            }
+            40% {
+                opacity: 0.15;
+                transform: translateY(480px) translateX(140px) scale(0.5);
+            }
+            70% {
+                opacity: 0;
+                transform: translateY(850px) translateX(220px) scale(0.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(1100px) translateX(280px) scale(0.05);
+            }
+        }
+
+        .falling-star.type2 {
+            width: 1.5px;
+            height: 1.5px;
+            box-shadow: 0 0 4px 1.5px rgba(255, 255, 255, 0.8), 0 0 10px 3px rgba(192, 132, 252, 0.6),
+                0 0 16px 5px rgba(124, 58, 237, 0.4);
+        }
+        .falling-star.type2::after {
+            width: 1.5px;
+            height: 30px;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.9), rgba(192, 132, 252, 0.35), transparent);
+            transform: translateY(-30px);
+        }
+        .falling-star.type3 {
+            width: 2.5px;
+            height: 2.5px;
+            box-shadow: 0 0 8px 3px rgba(255, 255, 255, 1), 0 0 16px 5px rgba(168, 85, 247, 0.8),
+                0 0 28px 8px rgba(99, 102, 241, 0.6), 0 0 45px 14px rgba(139, 92, 246, 0.35);
+            animation-duration: 2.5s;
+        }
+        .falling-star.type3::after {
+            width: 2.5px;
+            height: 55px;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(168, 85, 247, 0.5), transparent);
+            transform: translateY(-55px);
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+        }
+
+        /* === STATIC STARS === */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.8);
+            }
+        }
+
+        /* === MAIN CONTAINER === */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 520px;
+            padding: 20px;
+        }
+        .page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeSlideIn 0.45s ease-out;
+        }
+        .page.active {
+            display: flex;
+        }
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            20% {
+                transform: translateX(-8px);
+            }
+            40% {
+                transform: translateX(8px);
+            }
+            60% {
+                transform: translateX(-6px);
+            }
+            80% {
+                transform: translateX(6px);
+            }
+        }
+        .shake {
+            animation: shake 0.55s ease-out;
+        }
+
+        /* === GLASS CARD - ENHANCED MODERN === */
+        .glass-card {
+            background: rgba(18, 10, 35, 0.8);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
+            padding: 32px 24px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+                0 0 100px rgba(124, 58, 237, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            box-shadow: 0 35px 80px rgba(0, 0, 0, 0.65),
+                0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+                0 0 120px rgba(124, 58, 237, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* === TITLE ENHANCED === */
+        .main-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #c084fc, #a78bfa, #7c3aed, #c084fc);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleShimmer 4s ease-in-out infinite;
+            text-shadow: none;
+        }
+        @keyframes titleShimmer {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        .subtitle {
+            font-size: 0.85rem;
+            color: #a89cc4;
+            margin-bottom: 28px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        .emoji-icon {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            animation: bounceIcon 2s ease-in-out infinite;
+            display: inline-block;
+            filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.6));
+        }
+        @keyframes bounceIcon {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-16px);
+            }
+        }
+
+        /* === BUTTONS ENHANCED === */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px 20px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            color: #fff;
+            text-decoration: none;
+            text-align: center;
+            background: linear-gradient(135deg, #6d28d9, #7c3aed, #8b5cf6);
+            background-size: 200% 200%;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4), 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+        }
+        .btn:hover {
+            background-position: 100% 0%;
+            transform: translateY(-4px);
+            box-shadow: 0 18px 40px rgba(124, 58, 237, 0.55), 0 4px 12px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .btn:active {
+            transform: translateY(-1px) scale(0.97);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.45);
+            transition: all 0.1s ease;
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .btn:hover::after {
+            opacity: 1;
+        }
+        .btn-small {
+            padding: 12px 20px;
+            font-size: 0.85rem;
+            border-radius: 14px;
+            display: inline-block;
+            width: auto;
+            margin: 6px;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #7c3aed;
+            color: #c084fc;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+        .btn-outline:hover {
+            background: rgba(124, 58, 237, 0.15);
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.35);
+            border-color: #a855f7;
+        }
+
+        /* === SAVE BUTTON SPECIFIC === */
+        .btn-save {
+            background: linear-gradient(135deg, #4c1d95, #5b21b6, #6d28d9);
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* === OPTION BUTTONS ENHANCED === */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            width: 100%;
+            margin: 20px 0;
+        }
+        .option-btn {
+            padding: 16px 16px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            transition: all 0.25s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            color: #e0d5f5;
+            text-align: center;
+            position: relative;
+            backdrop-filter: blur(4px);
+        }
+        .option-btn:hover {
+            background: rgba(124, 58, 237, 0.25);
+            border-color: rgba(168, 85, 247, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+        .option-btn.selected {
+            background: linear-gradient(135deg, #6d28d9, #7c3aed);
+            border-color: #a855f7;
+            color: #fff;
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.6), 0 0 0 4px rgba(168, 85, 247, 0.2);
+            font-weight: 700;
+            transform: scale(1.02);
+        }
+        .option-btn.correct-flash {
+            background: linear-gradient(135deg, #15803d, #22c55e) !important;
+            border-color: #4ade80 !important;
+            color: #fff !important;
+            box-shadow: 0 0 40px rgba(34, 197, 94, 0.7), 0 0 0 6px rgba(34, 197, 94, 0.2) !important;
+            animation: pulseGreen 0.6s ease-out;
+        }
+        @keyframes pulseGreen {
+            0% {
+                transform: scale(1);
+            }
+            30% {
+                transform: scale(1.08);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .option-btn.wrong-flash {
+            background: linear-gradient(135deg, #991b1b, #ef4444) !important;
+            border-color: #f87171 !important;
+            color: #fff !important;
+            box-shadow: 0 0 40px rgba(239, 68, 68, 0.7), 0 0 0 6px rgba(239, 68, 68, 0.2) !important;
+        }
+
+        /* === LEVEL BADGE ENHANCED === */
+        .level-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: #fff;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 18px;
+            box-shadow: 0 6px 24px rgba(124, 58, 237, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 14px 0 6px;
+            color: #f0e6ff;
+            line-height: 1.5;
+            letter-spacing: 0.2px;
+        }
+        .question-sub {
+            font-size: 0.8rem;
+            color: #a89cc4;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        /* === FEEDBACK TOAST === */
+        .feedback-toast {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            padding: 16px 32px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.3px;
+            animation: toastIn 0.4s ease-out, toastOut 0.4s ease-in forwards;
+            animation-delay: 0s, 1.6s;
+            pointer-events: none;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        .feedback-toast.success {
+            background: rgba(21, 128, 61, 0.85);
+            color: #fff;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+        }
+        .feedback-toast.error {
+            background: rgba(153, 27, 27, 0.85);
+            color: #fff;
+            border: 1px solid rgba(248, 113, 113, 0.3);
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px);
+            }
+        }
+
+        /* === SUCCESS SCREEN === */
+        .success-icon {
+            font-size: 5.5rem;
+            animation: bounceIcon 0.7s ease-out;
+            display: inline-block;
+            filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.5));
+        }
+        .congrats-text {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 12px 0;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b, #fbbf24);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleShimmer 2s ease-in-out infinite;
+        }
+
+        /* === SUPPORT PAGE ENHANCED === */
+        .support-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #a855f7, #6366f1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 16px;
+            box-shadow: 0 16px 40px rgba(124, 58, 237, 0.6);
+            animation: bounceIcon 2.5s ease-in-out infinite;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 20px;
+            margin: 10px 0;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #e0d5f5;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+        .social-link:hover {
+            background: rgba(124, 58, 237, 0.25);
+            border-color: #a855f7;
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.3);
+            transform: translateY(-3px);
+        }
+        .social-icon {
+            font-size: 1.5rem;
+        }
+        .info-text {
+            color: #9b8bbe;
+            font-size: 0.75rem;
+            margin-top: 18px;
+            margin-bottom: 6px;
+            letter-spacing: 0.3px;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 480px) {
+            .main-container {
+                padding: 12px;
+            }
+            .glass-card {
+                padding: 24px 16px;
+                border-radius: 24px;
+            }
+            .main-title {
+                font-size: 1.7rem;
+            }
+            .question-text {
+                font-size: 1.2rem;
+            }
+            .option-btn {
+                padding: 14px 12px;
+                font-size: 0.85rem;
+            }
+            .options-grid {
+                gap: 10px;
+            }
+            .btn {
+                padding: 14px 16px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-animation">
+        <div class="bg-gradient"></div>
+        <div class="floating-orb orb1"></div>
+        <div class="floating-orb orb2"></div>
+        <div class="floating-orb orb3"></div>
+        <div class="stars" id="starsContainer"></div>
+    </div>
+
+    <div class="falling-stars-container" id="fallingStarsContainer"></div>
+
+    <div class="main-container">
+
+        <div class="page active" id="homePage">
+            <div class="glass-card">
+                <div class="emoji-icon">🧠</div>
+                <h1 class="main-title">BrainTest V1</h1>
+                <p class="subtitle">✨ Pilih Kategori ✨</p>
+                <button class="btn" onclick="openCategory('math')" style="font-size:1.1rem;">Math</button>
+                <button class="btn" onclick="openCategory('islam')" style="font-size:1.1rem;">Islam Religion</button>
+                <button class="btn" onclick="openCategory('science')" style="font-size:1.1rem;">Science</button>
+                <button class="btn" onclick="openCategory('physics')" style="font-size:1.1rem;">Physics</button>
+                <button class="btn" onclick="openCategory('support')" style="font-size:1.1rem;">💜 Support Developer</button>
+            </div>
+        </div>
+
+        <div class="page" id="categoryPage">
+            <div class="glass-card" id="categoryCard">
+                <div id="categoryContent"></div>
+            </div>
+        </div>
+
+        <div class="page" id="supportPage">
+            <div class="glass-card">
+                <div class="support-avatar">👨‍💻</div>
+                <h2 style="font-weight:800;margin:8px 0;color:#f0e6ff;"></h2>
+                <p style="color:#c4b5e3;margin-bottom:14px;line-height:1.6;font-size:0.95rem;">
+                    Halo Semua, Aplikasi Ini Dibuat Oleh Seseorang Yang Bernama <strong>"Pakxx"</strong>.<br>
+                    Jika Anda Menyukainya, Bisa Support Dengan Cara Follow Akun Tiktok Saya Yaa.
+                </p>
+                <a class="social-link" href="https://tiktok.com/@pakxxofficial" target="_blank" rel="noopener">
+                    <span class="social-icon">🎵</span> TikTok : @pakxxofficial
+                </a>
+                <a class="social-link" href="https://t.me/PakxxOfficial" target="_blank" rel="noopener">
+                    <span class="social-icon">✈️</span> Telegram : @PakxxOfficial
+                </a>
+                <p class="info-text">ⓘ Aplikasi Ini Diciptakan Hanya Untuk Bersenang Senang, Permainan Simple Yang Bisa Mengasah Otak Anda — 2026.</p>
+                <button class="btn btn-outline" style="margin-top:12px;width:100%;" onclick="goHome()">🏠 Kembali ke Menu</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toastContainer"></div>
+
+    <script>
+        const quizData = {
+            math: {
+                title: '📐 Math',
+                emoji: '🔢',
+                questions: [
+                    { question: '3 + 4 × 12 - 5', options: ['79', '21', '46', '33'], correct: 2 },
+                    { question: '9 ÷ 3 - 5 + 4', options: ['2', '1', '3', '5'], correct: 0 },
+                    { question: '6 × 6 - 30 + 6 ÷ 3', options: ['7', '6', '8', '9'], correct: 2 },
+                    { question: '5 × 5 ÷ 5 + 5 - 5', options: ['7', '5', '0', '6'], correct: 1 },
+                    { question: '5 + 3 - 15 × 13', options: ['37', '36', '-37', '-36'], correct: 2 },
+                    { question: '12 + 8 × 2 - 10', options: ['30', '18', '14', '26'], correct: 1 },
+                    { question: '20 ÷ 4 + 3 × 2', options: ['11', '16', '13', '8'], correct: 0 },
+                    { question: '7 × 3 - 8 ÷ 2 + 5', options: ['22', '24', '20', '18'], correct: 0 },
+                    { question: '15 + 9 ÷ 3 - 6', options: ['12', '14', '16', '10'], correct: 0 },
+                    { question: '8 × 4 - 10 ÷ 2 + 3', options: ['30', '28', '32', '26'], correct: 0 },
+                    { question: '18 ÷ 6 + 5 × 2 - 1', options: ['10', '12', '14', '9'], correct: 1 },
+                    { question: '4 × 7 - 6 + 18 ÷ 3', options: ['28', '26', '24', '30'], correct: 0 },
+                    { question: '30 - 5 × 2 + 8 ÷ 4', options: ['22', '20', '24', '18'], correct: 0 },
+                    { question: '9 + 12 ÷ 4 - 3 × 2', options: ['6', '8', '4', '10'], correct: 0 },
+                    { question: '6 × 5 + 14 ÷ 2 - 9', options: ['28', '26', '30', '24'], correct: 0 },
+                    { question: '24 ÷ 3 + 7 × 2 - 5', options: ['17', '19', '15', '21'], correct: 0 },
+                    { question: '10 + 6 × 3 - 12 ÷ 4', options: ['25', '23', '27', '21'], correct: 0 },
+                    { question: '5 × 8 - 6 ÷ 3 + 11', options: ['49', '47', '51', '45'], correct: 0 },
+                    { question: '36 ÷ 9 + 4 × 5 - 2', options: ['22', '20', '24', '18'], correct: 0 },
+                    { question: '14 - 3 × 2 + 20 ÷ 5', options: ['10', '12', '8', '14'], correct: 1 },
+                    { question: '8 + 16 ÷ 4 - 5 × 1', options: ['7', '9', '5', '11'], correct: 0 },
+                    { question: '3 × 9 - 15 ÷ 3 + 4', options: ['26', '24', '28', '22'], correct: 0 },
+                    { question: '40 ÷ 8 + 6 × 3 - 7', options: ['16', '14', '18', '20'], correct: 0 },
+                    { question: '11 + 5 × 4 - 6 ÷ 2', options: ['28', '26', '30', '24'], correct: 0 },
+                    { question: '7 × 6 - 8 + 24 ÷ 6', options: ['38', '36', '40', '34'], correct: 0 },
+                ],
+            },
+            islam: {
+                title: '🕌 Islam Religion',
+                emoji: '☪️',
+                questions: [
+                    { question: 'Berapakah Jumlah Nabi', options: ['25', '124.000', '315', '313'], correct: 1 },
+                    { question: 'Siapakah Malaikat Yang Tugas Nya Memberi Wahyu', options: ['Malaikat Jibril', 'Malaikat Izrail', 'Malaikat Israfil', 'Malaikat Ridwan'], correct: 0 },
+                    { question: 'Pada Umur Berapa Nabi Muhammad Tutup Usia', options: ['40', '63', '60', '30'], correct: 1 },
+                    { question: 'Apa Surat Pertama Di Al-Quran', options: ['An-Nas', 'Al-Buruj', 'Al-Fatihah', 'Al-Baqarah'], correct: 2 },
+                    { question: 'Pada Hari Kiamat Yang Akan Datang, Dajjal Akan Menghampiri Semua Tempat, Kecuali', options: ['Lampung', 'Makkah & Madinah', 'Tidak Ada', 'Masjid'], correct: 1 },
+                    { question: 'Berapakah Jumlah Rukun Islam', options: ['4', '5', '6', '3'], correct: 1 },
+                    { question: 'Berapakah Jumlah Rukun Iman', options: ['5', '7', '6', '4'], correct: 2 },
+                    { question: 'Siapakah Nabi Pertama', options: ['Adam AS', 'Nuh AS', 'Ibrahim AS', 'Musa AS'], correct: 0 },
+                    { question: 'Siapakah Nabi Terakhir', options: ['Isa AS', 'Musa AS', 'Muhammad SAW', 'Ibrahim AS'], correct: 2 },
+                    { question: 'Apa Kitab Yang Diturunkan Kepada Nabi Musa', options: ['Al-Quran', 'Taurat', 'Zabur', 'Injil'], correct: 1 },
+                    { question: 'Apa Kitab Yang Diturunkan Kepada Nabi Isa', options: ['Taurat', 'Zabur', 'Injil', 'Al-Quran'], correct: 2 },
+                    { question: 'Berapakah Shalat Wajib Dalam Sehari', options: ['3', '4', '5', '6'], correct: 2 },
+                    { question: 'Apa Nama Bapak Para Nabi', options: ['Ibrahim AS', 'Adam AS', 'Nuh AS', 'Ismail AS'], correct: 0 },
+                    { question: 'Siapakah Istri Pertama Nabi Muhammad', options: ['Aisyah', 'Khadijah', 'Hafsah', 'Fatimah'], correct: 1 },
+                    { question: 'Apa Nama Malaikat Pencabut Nyawa', options: ['Jibril', 'Izrail', 'Israfil', 'Mikail'], correct: 1 },
+                    { question: 'Apa Nama Malaikat Penjaga Surga', options: ['Malik', 'Ridwan', 'Jibril', 'Mikail'], correct: 1 },
+                    { question: 'Apa Nama Malaikat Penjaga Neraka', options: ['Ridwan', 'Jibril', 'Malik', 'Izrail'], correct: 2 },
+                    { question: 'Berapakah Jumlah Asmaul Husna', options: ['99', '100', '50', '33'], correct: 0 },
+                    { question: 'Apa Arti Al-Quran Secara Bahasa', options: ['Petunjuk', 'Bacaan', 'Cahaya', 'Hikmah'], correct: 1 },
+                    { question: 'Siapakah Sahabat Yang Dijuluki Al-Faruq', options: ['Abu Bakar', 'Utsman', 'Ali', 'Umar'], correct: 3 },
+                    { question: 'Apa Ibadah Haji Wajib Dilakukan Setelah', options: ['Shalat', 'Zakat', 'Puasa', 'Syahadat'], correct: 3 },
+                    { question: 'Ke Mana Nabi Muhammad Isra Miraj', options: ['Madinah', 'Makkah', 'Baitul Maqdis', 'Yaman'], correct: 2 },
+                    { question: 'Apa Mukjizat Nabi Musa AS', options: ['Kapal', 'Tongkat Jadi Ular', 'Api', 'Hujan'], correct: 1 },
+                    { question: 'Dimanakah Nabi Muhammad Lahir', options: ['Madinah', 'Makkah', 'Mesir', 'Syam'], correct: 1 },
+                    { question: 'Siapakah Nama Putri Nabi Muhammad', options: ['Khadijah', 'Aisyah', 'Fatimah', 'Hafsah'], correct: 2 },
+                ],
+            },
+            science: {
+                title: '🔬 Science',
+                emoji: '🧪',
+                questions: [
+                    { question: 'Planet Apa Yang Disebut "Planet Merah"', options: ['Tidak Ada', 'Matahari', 'Mars', 'Jupiter'], correct: 2 },
+                    { question: 'Siapakah Dokter Terbaik', options: ['Dr. Achmad', 'Dr. Robert', 'Dr. Budi', 'Matahari & Air Putih'], correct: 3 },
+                    { question: 'Hewan Yang Berkembang Biak Dengan Cara Bertelur Disebut', options: ['Mamalia', 'Ovivipar', 'Ovipar', 'Vivipar'], correct: 2 },
+                    { question: 'Apa Alat Pernapasan Ikan', options: ['Air', 'Paru-Paru', 'Insang', 'Trakea'], correct: 2 },
+                    { question: 'Sumber Energi Panas Terbesar Adalah', options: ['Lampu', 'Bulan', 'Api', 'Matahari'], correct: 3 },
+                    { question: 'Planet Apa Yang Paling Dekat Dengan Matahari', options: ['Venus', 'Merkurius', 'Bumi', 'Mars'], correct: 1 },
+                    { question: 'Apa Planet Terbesar Di Tata Surya', options: ['Saturnus', 'Jupiter', 'Uranus', 'Neptunus'], correct: 1 },
+                    { question: 'Apa Nama Satelit Alami Bumi', options: ['Matahari', 'Bulan', 'Mars', 'Bintang'], correct: 1 },
+                    { question: 'Hewan Apa Yang Bernapas Dengan Paru-Paru', options: ['Ikan', 'Kucing', 'Cacing', 'Serangga'], correct: 1 },
+                    { question: 'Apa Zat Hijau Pada Tumbuhan', options: ['Klorofil', 'Fotosintesis', 'Akar', 'Batang'], correct: 0 },
+                    { question: 'Apa Proses Tumbuhan Membuat Makanan', options: ['Respirasi', 'Fotosintesis', 'Transpirasi', 'Evaporasi'], correct: 1 },
+                    { question: 'Berapakah Jumlah Gigi Orang Dewasa', options: ['28', '30', '32', '34'], correct: 2 },
+                    { question: 'Apa Indra Manusia Untuk Mengecap', options: ['Mata', 'Telinga', 'Lidah', 'Hidung'], correct: 2 },
+                    { question: 'Apa Tulang Terpanjang Manusia', options: ['Tengkorak', 'Femur', 'Tulang Rusuk', 'Tulang Belakang'], correct: 1 },
+                    { question: 'Apa Hewan Tercepat Di Darat', options: ['Singa', 'Cheetah', 'Kuda', 'Anjing'], correct: 1 },
+                    { question: 'Apa Hewan Terbesar Di Dunia', options: ['Gajah', 'Paus Biru', 'Hiu', 'Jerapah'], correct: 1 },
+                    { question: 'Apa Gas Yang Dihirup Manusia', options: ['Oksigen', 'Nitrogen', 'Karbon Dioksida', 'Helium'], correct: 0 },
+                    { question: 'Apa Organ Pemompa Darah Manusia', options: ['Paru-Paru', 'Jantung', 'Hati', 'Ginjal'], correct: 1 },
+                    { question: 'Apa Vitamin Dari Sinar Matahari', options: ['Vitamin A', 'Vitamin B', 'Vitamin C', 'Vitamin D'], correct: 3 },
+                    { question: 'Berapakah Suhu Tubuh Normal Manusia', options: ['35°C', '36°C', '37°C', '38°C'], correct: 2 },
+                    { question: 'Apa Burung Terbesar Di Dunia', options: ['Elang', 'Burung Unta', 'Penguin', 'Albatros'], correct: 1 },
+                    { question: 'Apa Hewan Yang Dapat Hidup Di Air Dan Darat', options: ['Reptil', 'Amfibi', 'Mamalia', 'Serangga'], correct: 1 },
+                    { question: 'Apa Benda Langit Yang Menghasilkan Cahaya Sendiri', options: ['Planet', 'Bulan', 'Bintang', 'Satelit'], correct: 2 },
+                    { question: 'Apa Lapisan Atmosfer Paling Bawah', options: ['Stratosfer', 'Mesosfer', 'Termosfer', 'Troposfer'], correct: 3 },
+                    { question: 'Apa Hewan Yang Memiliki Leher Terpanjang', options: ['Gajah', 'Jerapah', 'Kuda', 'Unta'], correct: 1 },
+                ],
+            },
+            physics: {
+                title: '⚡ Physics',
+                emoji: '⚛️',
+                questions: [
+                    { question: 'Perpindahan Panas Tanpa Melalui Zat Perantara Disebut', options: ['Konduksi', 'Konveksi', 'Evaporasi', 'Radiasi'], correct: 3 },
+                    { question: 'Alat Listrik Di Rumah Biasanya Di Rangkai Secara', options: ['Paralel', 'Campuran', 'Seri', 'Acak'], correct: 0 },
+                    { question: 'Sebuah Gaya Sebesar 15 N Bekerja Pada Sebuah Benda Sehingga Benda Berpindah Sejauh 4 Meter Searah Gaya. Usaha Yang Dilakukan Adalah', options: ['11 Joule', '19 Joule', '60 Joule', '30 Joule'], correct: 2 },
+                    { question: 'Satuan Internasional ( SI ) Untuk Gaya Adalah', options: ['Newton', 'Joule', 'Pascal', 'Watt'], correct: 0 },
+                    { question: 'Sebuah Mobil Bergerak Dengan Kecepatan Tetap 60 Km/Jam. Dalam Waktu 2 Jam, Jarak Yang Ditempuh Adalah', options: ['120 Km', '60 Km', 'Viertel', '100 Km'], correct: 0 },
+                    { question: 'Apa Satuan Dari Tegangan Listrik', options: ['Ampere', 'Volt', 'Ohm', 'Watt'], correct: 1 },
+                    { question: 'Apa Satuan Dari Kuat Arus Listrik', options: ['Volt', 'Ampere', 'Ohm', 'Watt'], correct: 1 },
+                    { question: 'Apa Satuan Dari Hambatan Listrik', options: ['Volt', 'Ampere', 'Ohm', 'Watt'], correct: 2 },
+                    { question: 'Apa Satuan Dari Daya Listrik', options: ['Volt', 'Ampere', 'Ohm', 'Watt'], correct: 3 },
+                    { question: 'Perubahan Wujud Dari Cair Menjadi Gas Disebut', options: ['Membeku', 'Menguap', 'Mencair', 'Menyublim'], correct: 1 },
+                    { question: 'Perubahan Wujud Dari Gas Menjadi Cair Disebut', options: ['Menguap', 'Membeku', 'Mengembun', 'Mencair'], correct: 2 },
+                    { question: 'Alat Ukur Panjang Adalah', options: ['Termometer', 'Penggaris', 'Neraca', 'Stopwatch'], correct: 1 },
+                    { question: 'Alat Ukur Suhu Adalah', options: ['Penggaris', 'Neraca', 'Termometer', 'Stopwatch'], correct: 2 },
+                    { question: 'Alat Ukur Massa Adalah', options: ['Penggaris', 'Termometer', 'Stopwatch', 'Neraca'], correct: 3 },
+                    { question: 'Alat Ukur Waktu Adalah', options: ['Neraca', 'Termometer', 'Stopwatch', 'Penggaris'], correct: 2 },
+                    { question: 'Jika Massa 5 Kg Dan Percepatan 2 m/s², Berapakah Gaya', options: ['7 N', '9 N', '10 N', '12 N'], correct: 2 },
+                    { question: 'Bunyi Merambat Paling Cepat Melalui', options: ['Udara', 'Air', 'Padat', 'Ruang Hampa'], correct: 2 },
+                    { question: 'Cahaya Merambat Secara', options: ['Lengkung', 'Lurus', 'Acak', 'Melambat'], correct: 1 },
+                    { question: 'Apa Warna Cahaya Yang Memiliki Panjang Gelombang Terpanjang', options: ['Biru', 'Hijau', 'Merah', 'Ungu'], correct: 2 },
+                    { question: 'Gaya Yang Melawan Arah Gerak Benda Disebut', options: ['Gaya Otot', 'Gaya Gesek', 'Gaya Gravitasi', 'Gaya Magnet'], correct: 1 },
+                    { question: 'Energi Yang Dimiliki Benda Karena Geraknya Disebut', options: ['Energi Potensial', 'Energi Kinetik', 'Energi Kimia', 'Energi Panas'], correct: 1 },
+                    { question: 'Alat Untuk Mengukur Tekanan Udara Adalah', options: ['Termometer', 'Barometer', 'Hidrometer', 'Manometer'], correct: 1 },
+                    { question: 'Jika Jarak 100 Meter Ditempuh Dalam 20 Detik, Berapa Kecepatan', options: ['4 m/s', '5 m/s', '6 m/s', '8 m/s'], correct: 1 },
+                    { question: 'Magnet Memiliki Dua Kutub Yaitu', options: ['Atas Bawah', 'Kanan Kiri', 'Utara Selatan', 'Timur Barat'], correct: 2 },
+                    { question: 'Benda Yang Dapat Ditarik Magnet Disebut', options: ['Non Magnetis', 'Feromagnetik', 'Diamagnetik', 'Isolator'], correct: 1 },
+                ],
+            },
+        };
+
+        let currentCategory = null;
+        let currentLevel = { math: 0, islam: 0, science: 0, physics: 0 };
+        let selectedOption = null;
+        let isLocked = false;
+        const STORAGE_KEY = 'brainGameProgress';
+
+        // Load progress dari localStorage
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && typeof parsed === 'object') {
+                        for (const cat in quizData) {
+                            if (parsed[cat] !== undefined && typeof parsed[cat] === 'number') {
+                                currentLevel[cat] = parsed[cat];
+                            }
+                        }
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function saveProgress(cat) {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                const data = saved ? JSON.parse(saved) : {};
+                data[cat] = currentLevel[cat];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                showToast('💾 Progress tersimpan!', 'success');
+            } catch (e) {
+                showToast('❌ Gagal menyimpan progress.', 'error');
+            }
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById(pageId);
+            if (target) {
+                target.classList.add('active');
+                target.style.animation = 'none';
+                target.offsetHeight;
+                target.style.animation = 'fadeSlideIn 0.45s ease-out';
+            }
+        }
+
+        function goHome() {
+            currentCategory = null;
+            selectedOption = null;
+            isLocked = false;
+            showPage('homePage');
+        }
+
+        function openCategory(cat) {
+            if (cat === 'support') {
+                currentCategory = null;
+                showPage('supportPage');
+                return;
+            }
+            currentCategory = cat;
+            selectedOption = null;
+            isLocked = false;
+            if (currentLevel[cat] >= quizData[cat].questions.length) {
+                currentLevel[cat] = 0;
+            }
+            showPage('categoryPage');
+            renderLevel();
+        }
+
+        function renderLevel() {
+            const cat = currentCategory;
+            if (!cat) return;
+            const data = quizData[cat];
+            const lvl = currentLevel[cat];
+            const totalLevels = data.questions.length;
+
+            if (lvl >= totalLevels) {
+                renderSuccess();
+                return;
+            }
+
+            const q = data.questions[lvl];
+            selectedOption = null;
+            isLocked = false;
+
+            const content = document.getElementById('categoryContent');
+            content.innerHTML = `
+                <div style="margin-bottom:8px;">${data.emoji} <span style="color:#a89cc4;font-size:0.85rem;">${data.title}</span></div>
+                <div class="level-badge">Level ${lvl + 1} / ${totalLevels}</div>
+                <div class="question-text">${q.question}</div>
+                <div class="question-sub">Pilih jawaban yang benar:</div>
+                <div class="options-grid" id="optionsGrid">
+                    ${q.options.map((opt, i) => `
+                        <button class="option-btn" data-index="${i}" onclick="selectOption(${i}, this)">
+                            ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+                <button class="btn" id="checkBtn" onclick="checkAnswer()">✓ Check Answer</button>
+                <button class="btn btn-save btn-small" onclick="saveProgress('${cat}')" style="width:100%;">
+                    💾 Save Progress
+                </button>
+                <button class="btn btn-outline btn-small" onclick="goHome()" style="width:100%;">
+                    🏠 Kembali ke Menu
+                </button>
+            `;
+
+            const card = document.getElementById('categoryCard');
+            card.style.animation = 'none';
+            card.offsetHeight;
+            card.style.animation = 'fadeSlideIn 0.45s ease-out';
+        }
+
+        function selectOption(index, btnElement) {
+            if (isLocked) return;
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btnElement.classList.add('selected');
+            selectedOption = index;
+        }
+
+        function checkAnswer() {
+            if (isLocked) return;
+            const cat = currentCategory;
+            if (!cat) return;
+            const data = quizData[cat];
+            const lvl = currentLevel[cat];
+            if (lvl >= data.questions.length) return;
+
+            if (selectedOption === null) {
+                showToast('⚠️ Pilih Jawaban Terlebih Dahulu!', 'error');
+                return;
+            }
+
+            isLocked = true;
+            const q = data.questions[lvl];
+            const correctIndex = q.correct;
+            const allOptions = document.querySelectorAll('.option-btn');
+            const selectedBtn = allOptions[selectedOption];
+            const correctBtn = allOptions[correctIndex];
+
+            if (selectedOption === correctIndex) {
+                selectedBtn.classList.add('correct-flash');
+                showToast('✅ Benar! Lanjut kelevel berikutnya...', 'success');
+                setTimeout(() => {
+                    currentLevel[cat]++;
+                    if (currentLevel[cat] >= data.questions.length) {
+                        renderSuccess();
+                    } else {
+                        renderLevel();
+                    }
+                    isLocked = false;
+                }, 1500);
+            } else {
+                selectedBtn.classList.add('wrong-flash');
+                if (correctBtn) correctBtn.classList.add('correct-flash');
+                showToast('❌ Salah! Tetap di level ini. Coba lagi.', 'error');
+                const card = document.getElementById('categoryCard');
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 600);
+                setTimeout(() => {
+                    allOptions.forEach(b => {
+                        b.classList.remove('wrong-flash', 'correct-flash', 'selected');
+                    });
+                    selectedOption = null;
+                    isLocked = false;
+                }, 1600);
+            }
+        }
+
+        function renderSuccess() {
+            const cat = currentCategory;
+            const data = quizData[cat];
+            const content = document.getElementById('categoryContent');
+            content.innerHTML = `
+                <div class="success-icon">🎉</div>
+                <div class="congrats-text">Selamat!</div>
+                <p style="color:#c4b5e3;margin:8px 0 20px;line-height:1.5;">
+                    Kamu Telah Menyelesaikan <strong>Semua Level</strong> Di Kategori<br>
+                    <span style="font-size:1.1rem;">${data.emoji} ${data.title}</span>
+                </p>
+                <button class="btn" onclick="resetCategory()">🔄 Ulangi Kategori</button>
+                <button class="btn btn-outline" onclick="goHome()" style="width:100%;">🏠 Kembali ke Menu</button>
+            `;
+            isLocked = false;
+            selectedOption = null;
+            const card = document.getElementById('categoryCard');
+            card.style.animation = 'none';
+            card.offsetHeight;
+            card.style.animation = 'fadeSlideIn 0.45s ease-out';
+        }
+
+        function resetCategory() {
+            const cat = currentCategory;
+            if (!cat) return;
+            currentLevel[cat] = 0;
+            selectedOption = null;
+            isLocked = false;
+            renderLevel();
+        }
+
+        function showToast(message, type) {
+            const container = document.getElementById('toastContainer');
+            container.innerHTML = '';
+            const toast = document.createElement('div');
+            toast.className = `feedback-toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentNode) toast.remove();
+            }, 2100);
+        }
+
+        function createStaticStars() {
+            const container = document.getElementById('starsContainer');
+            if (!container) return;
+            const count = 80;
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                const size = Math.random() * 2.5 + 0.8;
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                const delay = Math.random() * 5;
+                const dur = Math.random() * 3 + 2;
+                html +=
+                    `<div class="star" style="width:${size}px;height:${size}px;left:${x}%;top:${y}%;animation-delay:${delay}s;animation-duration:${dur}s;"></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function createFallingStars() {
+            const container = document.getElementById('fallingStarsContainer');
+            if (!container) return;
+            const count = 35;
+            let html = '';
+            const types = ['', 'type2', 'type3', 'type2', '', 'type3', '', 'type2', '', 'type3', 'type2', ''];
+            for (let i = 0; i < count; i++) {
+                const startX = Math.random() * 100;
+                const duration = Math.random() * 4 + 3.5;
+                const delay = Math.random() * 12;
+                const typeClass = types[Math.floor(Math.random() * types.length)];
+                const extraStyle = typeClass === 'type3' ?
+                    `animation-duration:${Math.random() * 2 + 1.8}s;` :
+                    `animation-duration:${duration}s;`;
+                html +=
+                    `<div class="falling-star ${typeClass}" style="left:${startX}%;animation-delay:${delay}s;${extraStyle}"></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function init() {
+            loadProgress();
+            createStaticStars();
+            createFallingStars();
+            showPage('homePage');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+
+        document.addEventListener('keydown', function(e) {
+            if (currentCategory && !isLocked) {
+                const lvl = currentLevel[currentCategory];
+                const data = quizData[currentCategory];
+                if (lvl < data.questions.length) {
+                    const keys = ['1', '2', '3', '4'];
+                    const idx = keys.indexOf(e.key);
+                    if (idx >= 0 && idx < data.questions[lvl].options.length) {
+                        const btns = document.querySelectorAll('.option-btn');
+                        if (btns[idx]) {
+                            selectOption(idx, btns[idx]);
+                        }
+                    }
+                    if (e.key === 'Enter' && selectedOption !== null) {
+                        checkAnswer();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
